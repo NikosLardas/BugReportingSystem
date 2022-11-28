@@ -1,0 +1,173 @@
+<!-- 
+    HTML Code for the Bugs Form Component 
+    Author: Nikos Lardas
+    Created: 05.2022
+-->
+
+<div id="bugs-form" class="my-5">
+
+  <!-- Success message displayed after Bug Creation or Update -->
+  <div class="container flex-column alert alert-success w-25 d-flex justify-content-center align-items-center" *ngIf="bugCreatedOrUpdated">
+    <strong>Your Bug was submitted successfully!</strong>
+    <div>Thank you for your help towards a Bug Free Application</div>
+  </div>
+
+  <!-- Component Header displaying sector, displays title conditionally based on check if we are creating a new bug or editing a previously created one -->
+  <div class="fs-3 text-center mb-5 fw-bold" *ngIf="newBug; else elseTitle">Report a new Bug</div>
+
+  <ng-template #elseTitle >
+    <div class="fs-3 text-center mb-5 fw-bold">Edit Bug</div>
+  </ng-template>
+  <!-- End of Component Header -->
+
+  <!-- Bugs Form Section  -->
+  <div class="container-fluid d-flex align-items-center justify-content-center">
+
+    <!-- Bugs Reactive Creation & Editing Form -->
+    <form  (ngSubmit)='formSubmit()' [formGroup]='bugForm' class="w-50" novalidate>
+
+      <!-- Definition of fields with the use of the Bootstrap Grid System -->
+      <div class="row mb-5">
+        <!-- Bug Title field with Label and Validation Messages  -->
+        <div class="col">
+          <label for="bug-title" class="form-label fs-5">Title</label>
+          <input type="text" id="bug-title" formControlName="title" class="form-control" placeholder="Please Insert Bug Title">
+
+          <!-- Required and touched validation -->
+          <div class="alert alert-danger"
+          *ngIf=" bugForm.get('title')?.errors?.['required'] && bugForm.get('title')?.touched">
+          Title field is required
+          </div>
+          <!-- Minimum Length and touched validation -->
+          <div class="alert alert-danger"
+            *ngIf=" bugForm.get('title')?.errors?.['minlength'] && bugForm.get('title')?.touched">
+          Title length should be at least 4 characters long
+          </div>
+        </div>
+
+        <!-- Bug Priority field with Label and Validation Messages  -->
+        <div class="col">
+          <label for="bug-priority" class="form-label fs-5">Priority</label>
+          <select id="bug-priority" formControlName="priority" class="form-control">
+            <option value="" selected>Please Select Bug Priority</option>
+            <option value="1">Minor</option>
+            <option value="2">Major</option>
+            <option value="3">Critical</option>
+          </select>
+
+          <!-- Required and touched validation -->
+          <div class="alert alert-danger"
+          *ngIf=" bugForm.get('priority')?.errors?.['required'] && bugForm.get('priority')?.touched">
+          Priority field is required
+          </div>
+        </div>
+
+      </div>
+
+      <div class="row mb-5">
+
+        <!-- Bug Reporter field with Label and Validation Messages  -->
+        <div class="col">
+          <label for="bug-reporter" class="form-label fs-5">Reporter</label>
+          <!-- On change call the validateStatus method to make the Status required if the Reporter is QA -->
+          <select id="bug-reporter" formControlName="reporter" (change)="validateStatus()" class="form-control" >
+            <option value="" selected>Please Select the Bug Reporter</option>
+            <option value="QA">QA</option>
+            <option value="PO">PO</option>
+            <option value="DEV">DEV</option>
+          </select>
+
+          <!-- Required and touched validation -->
+          <div class="alert alert-danger"
+          *ngIf=" bugForm.get('reporter')?.errors?.['required'] && bugForm.get('reporter')?.touched">
+          Reporter field is required
+          </div>
+        </div>
+
+        <!-- Bug Status field with Label and Validation Messages  -->
+        <div class="col">
+          <label for="bug-status" class="form-label fs-5">Status</label>
+          <select id="bug-status" formControlName="status" class="form-control">
+            <option value="" selected>Please Select Bug Status</option>
+            <option value="Ready for Testing">Ready for Testing</option>
+            <option value="Done">Done</option>
+            <option value="Rejected">Rejected</option>
+          </select>
+
+          <!-- Required and touched validation -->
+          <div class="alert alert-danger"
+          *ngIf=" bugForm.get('status')?.errors?.['required'] && bugForm.get('status')?.touched">
+          Status field is required
+          </div>
+        </div>
+
+      </div>
+        
+      <div class="row mb-5">
+        
+        <!-- Bug Description field with Label and Validation Messages  -->
+        <div class="col">
+          <label for="bug-description" class="form-label fs-5">Description</label>
+          <textarea id="bug-description" formControlName="description" class="form-control" placeholder="Please Insert Bug Description"></textarea>
+        
+          <!-- Required and touched validation -->
+          <div class="alert alert-danger"
+          *ngIf=" bugForm.get('description')?.errors?.['required'] && bugForm.get('description')?.touched">
+          Description field is required
+          </div>
+                
+          <!-- Minimum and Maximum length and touched validation -->
+          <div class="alert alert-danger"
+            *ngIf=" (bugForm.get('description')?.errors?.['minlength'] || bugForm.get('description')?.errors?.['maxlength']) && bugForm.get('description')?.touched">
+          Description length should be between 50 and 1000 characters
+          </div>
+        
+        </div>
+      </div>
+
+      <!-- Bug Comment Section optionally displayed only on the Edit Bug Form -->
+      <div class="row mb-5 gx-5" *ngIf="!newBug">
+        
+        <!-- Bug Comment Reporter field with Label -->
+        <div class="col-3">
+          <label for="bug-comment-reporter" class="form-label fs-5">Reporter</label>
+          <input type="text" id="bug-comment-reporter" formControlName="commentReporter" class="form-control" placeholder="Add Name of Reporter">
+        </div>
+
+        <!-- Bug Comment Description field with Label -->
+        <div class="col-7">
+          <label for="bug-comment-description" class="form-label fs-5">Comment</label>
+          <textarea id="bug-comment-description" formControlName="commentDescription" class="form-control" placeholder="Add a comment here"></textarea>
+        </div>
+
+        <!-- Bug Comment Addition Button, optionally disabled until both Comment Reporter and Description fields have values -->
+        <div class="col-2 align-self-end">
+          <button [disabled]="bugForm.get('commentDescription')?.value == '' || bugForm.get('commentReporter')?.value == '' " 
+          type="button" class="btn btn-primary" (click)="addComment()">Add Comment</button>
+        </div>
+      </div>
+
+      <!-- List of created Comments displayed conditionally if we are on the Edit Form, 
+      the collection of comments has values and the bug has not been submitted yet -->
+      <div class="row mb-4" *ngIf="!newBug && bugComments.length > 0 && !bugCreatedOrUpdated">
+        <div class="col">
+          <div class="fs-5 mb-5 fw-bold">Comments Added</div>
+          <!-- Iteration over collection of comments as an unordered list -->
+          <ul *ngFor="let comment of bugComments;">
+            <li class="alert alert-success">
+              <strong>Reporter:</strong> {{comment.reporter}} <br> <strong>Comment:</strong> {{comment.description}}
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Bug Form Submit Button, optionally disabled until the Bug Form is valid -->
+      <button [disabled]='bugForm.invalid' type="submit" class="btn btn-primary">Submit</button>
+
+    </form>
+    <!-- End of Reactive Bugs Creation & Editing Form -->
+
+  </div>
+  <!-- End of Bugs Form Section  -->
+
+</div>

@@ -1,3 +1,9 @@
+/*
+    Typescript Code for the App Component
+    Author: Nikos Lardas
+    Created: 05.2022
+*/
+
 import { Component } from '@angular/core';
 
 @Component({

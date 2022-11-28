@@ -1,0 +1,75 @@
+<!-- 
+    HTML Code for the Bugs Table Component 
+    Author: Nikos Lardas
+    Created: 05.2022
+-->
+
+<!-- Loading Message while retrieving data from the API -->
+<div id="loading-message" class="h2 text-center mt-5" *ngIf="loading">Retrieving List of Bugs...</div>
+
+<!-- Bugs Table -->
+<div id="bugs-table" class="d-flex align-items-center justify-content-center my-5">
+    <table class="table table-dark table-hover table-bordered w-75">
+      <thead>
+        <tr>
+          <th colspan="7">
+            <div class="d-flex justify-content-between">
+              <!-- Form for calling the API to search Bugs by Title on every KeyUp -->
+              <div class="form-group">
+                <form [formGroup]='searchForm' novalidate class="form">
+                  <div>
+                    <input class="form-control" style="width:250px;" (keyup)="searchByTitle()" formControlName='bugTitle' type="text" placeholder="Search Bugs">
+                    </div>
+                </form>
+              </div>
+              <!-- Button that navigates user to Add New Bug Page -->
+              <button class="btn btn-primary me-2 fw-bold" style="width:250px;" (click)="navigateAddForm()">Add New Bug</button>
+            </div>
+          </th>
+        </tr>
+        <!-- Collection of Table Headers loaded dynamically -->
+        <tr>
+          <th *ngFor="let tableTitle of tableTitles;">
+            <!-- Link on every table title to call the API for Bi-Directional sorting,
+            making sure each header starts with a capital Letter -->
+            <a class="table-header" (click)="sortData(tableTitle)">{{tableTitle.charAt(0).toUpperCase() + tableTitle.slice(1)}}
+               <!-- Conditions to make sure the correct arrow is displayed depending on sorting type  -->
+              <span *ngIf="(displayArrow) && (titleWithArrow == tableTitle)">
+                <img *ngIf="arrowDir == 'up';else elseBlock" class="table-arrow" src="assets/Table-Arrow-Up.png" alt="Up">
+                <ng-template #elseBlock >
+                  <img *ngIf="arrowDir == 'down'" class="table-arrow" src="assets/Table-Arrow-Down.png" alt="Down">
+                </ng-template>
+              </span>
+            </a>
+          </th>
+          <th>Edit Bug</th>
+          <th>Delete Bug</th>
+        </tr>
+        <!-- End of Collection of Table Headers -->
+      </thead>
+      <!-- Table Body displaying the collection of Bugs retrieved by the API with max size 10 -->
+      <tbody>
+        <tr *ngFor="let bug of results;">
+          <td>{{bug.title}}</td>
+          <td>{{bug.priority}}</td>
+          <td>{{bug.reporter}}</td>
+          <td>{{bug.createdAt}}</td>
+          <td>{{bug.status}}</td>
+          <!-- On click navigate to the Edit Form Page -->
+          <td><button class="btn btn-secondary" (click)="navigateEditForm(bug)">Edit</button></td>
+          <!-- On click call the API to Delete the corresponding bug and then reload the table -->
+          <td><button class="btn btn-danger" (click)="deleteData(bug.id!)">Delete</button></td>
+        </tr>
+      </tbody>
+      <!-- End of Table Body -->
+      <tfoot>
+        <!-- Table footer displaying the Previous and Next Button for the Table Pagination -->
+        <tr>
+          <td colspan="7" style="text-align: right;">
+            <button class="btn btn-secondary mx-1" (click)="paginateData('prev')">Previous Page</button>
+            <button class="btn btn-secondary mx-1" (click)="paginateData('next')">Next Page</button>
+          </td>
+        </tr>
+      </tfoot>
+    </table>
+</div>
